@@ -90,7 +90,7 @@
 							<#assign maxPrevMarkerCols = 0 />
 							<#list enhancedMarkerFeedbacks as emf>
 								<#assign mf = emf.markerFeedback />
-								<#assign student = mf.student />
+								<#assign student = emf.workflowStudent.info.user />
 								<#assign studentId><#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>${mf.feedback.anonymousId}<#else>${student.userId}</#if></#assign>
 								<tr
 									data-toggle="collapse"

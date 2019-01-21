@@ -23,7 +23,7 @@ case class EnhancedMarkerFeedback(
 	markerFeedback: MarkerFeedback,
 	workflowStudent: MarkingWorkflowStudent
 ) {
-	def previousMarkerFeedback: Seq[MarkerFeedback] = {
+	lazy val previousMarkerFeedback: Seq[MarkerFeedback] = {
 		val previousStages = markerFeedback.stage.previousStages
 		markerFeedback.feedback.allMarkerFeedback.filter(s => previousStages.contains(s.stage))
 	}
@@ -33,12 +33,17 @@ case class MarkingWorkflowStudent (
 	stages: Seq[WorkflowStages.StageProgress],
 	info: AssignmentSubmissionStudentInfo
 ) {
-	def coursework: WorkflowItems = info.coursework
-	def assignment: Assignment = info.assignment
-	def nextAction: Option[String] = stages.filterNot(_.completed).headOption.map(_.stage.actionCode)
+	lazy val coursework: WorkflowItems = info.coursework
+	lazy val assignment: Assignment = info.assignment
+	lazy val nextAction: Option[String] = stages.filterNot(_.completed).headOption.map(_.stage.actionCode)
 }
 
 object ListMarkerFeedbackCommand {
+
+	case class ListMarkerFeedbackResult(
+		orders: Seq[EnhancedFeedbackForOrderAndStage],
+		students: Map[String, User]
+	)
 
 	case class EnhancedFeedbackForOrderAndStage(
 		hasFeedback: Boolean,
@@ -54,8 +59,8 @@ object ListMarkerFeedbackCommand {
 			}.foldLeft(FeedbackByActionability(Nil, Nil, Nil))((a, b) => a.merge(b))
 		}
 
-		def headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
-		def numPreviousMarkers: Int = enhancedFeedbackByStage(headerStage)
+		lazy val  headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
+		lazy val  numPreviousMarkers: Int = enhancedFeedbackByStage(headerStage)
 			.map(_.previousMarkerFeedback.size)
 			.reduceOption(_ max _)
 			.getOrElse(0)
@@ -66,7 +71,7 @@ object ListMarkerFeedbackCommand {
 		notReadyToMark: Seq[EnhancedMarkerFeedback],
 		marked: Seq[EnhancedMarkerFeedback]
 	) {
-		def all: Seq[EnhancedMarkerFeedback] = readyToMark ++ notReadyToMark ++ marked
+		lazy val all: Seq[EnhancedMarkerFeedback] = readyToMark ++ notReadyToMark ++ marked
 		def merge(other: FeedbackByActionability): FeedbackByActionability = FeedbackByActionability(
 			readyToMark = readyToMark ++ other.readyToMark,
 			notReadyToMark = notReadyToMark ++ other.notReadyToMark,

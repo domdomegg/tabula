@@ -123,7 +123,7 @@ class MarkerFeedback extends GeneratedId
 	@Deprecated
 	var rejectionComments: String = _
 
-	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade=Array(ALL))
+	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade = Array(ALL))
 	@BatchSize(size=200)
 	@Fetch(FetchMode.JOIN)
 	var attachments: JSet[FileAttachment] = JHashSet()
@@ -135,7 +135,9 @@ class MarkerFeedback extends GeneratedId
 		attachments.add(attachment)
 	}
 
-	@OneToMany(mappedBy = "markerFeedback", cascade = Array(ALL))
+	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade = Array(ALL))
+	@BatchSize(size=200)
+	@Fetch(FetchMode.JOIN)
 	var customFormValues: JSet[SavedFormValue] = JHashSet()
 
 	def clearCustomFormValues(): Unit = {
