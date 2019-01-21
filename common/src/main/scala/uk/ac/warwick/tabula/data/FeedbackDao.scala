@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.criterion.Projections
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 
 trait FeedbackDao {
@@ -88,3 +89,11 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
 @Repository
 class FeedbackDaoImpl extends AbstractFeedbackDao with Daoisms
+
+trait FeedbackDaoComponent {
+	def feedbackDao: FeedbackDao
+}
+
+trait AutowiringFeedbackDaoComponent extends FeedbackDaoComponent {
+	def feedbackDao: FeedbackDao = Wire[FeedbackDao]
+}

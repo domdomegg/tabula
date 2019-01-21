@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.helpers.cm2
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.{WorkflowStage, WorkflowStages}
@@ -11,6 +12,13 @@ case class SubmissionListItem(submission: Submission, downloaded: Boolean)
 case class ExtensionListItem (extension: Extension,	within: Boolean)
 case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: Option[FeedbackForSits])
 case class Progress (percentage: Int, t: String, messageCode: String)
+
+case class FeedbackMetadata(
+	downloads: Seq[(User, DateTime)],
+	latestOnlineViews: Map[User, DateTime],
+	latestOnlineAdded: Map[User, DateTime],
+	latestGenericFeedback: Option[DateTime]
+)
 
 // Simple object holder
 case class AssignmentSubmissionStudentInfo (

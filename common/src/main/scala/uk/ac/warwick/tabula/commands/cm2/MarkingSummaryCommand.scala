@@ -308,11 +308,16 @@ trait MarkingSummaryPermissions extends RequiresPermissionsChecking {
 }
 
 trait WorkflowStudentsForAssignment {
-	def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo]
+	def workflowStudentsFor(assignment: Assignment, students: Set[User] = Set.empty): Seq[AssignmentSubmissionStudentInfo]
 }
 
 trait CommandWorkflowStudentsForAssignment extends WorkflowStudentsForAssignment {
-	def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo] = SubmissionAndFeedbackCommand(assignment).apply().students
+	def workflowStudentsFor(assignment: Assignment, students: Set[User] = Set.empty): Seq[AssignmentSubmissionStudentInfo] = {
+		val cmd = SubmissionAndFeedbackCommand(assignment)
+		cmd.students = JList(students.toSeq: _*)
+		val result = cmd.apply()
+		result.students
+	}
 }
 
 object MarkerWorkflowInformation {

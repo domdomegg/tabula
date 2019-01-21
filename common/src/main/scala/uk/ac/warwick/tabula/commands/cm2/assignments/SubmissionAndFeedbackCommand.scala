@@ -4,8 +4,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
-import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.OverlapPlagiarismFilter
@@ -26,11 +24,12 @@ object SubmissionAndFeedbackCommand {
 			with ComposableCommand[SubmissionAndFeedbackResults]
 			with SubmissionAndFeedbackRequest
 			with SubmissionAndFeedbackPermissions
-			with CommandSubmissionAndFeedbackEnhancer
 			with AutowiringAssessmentMembershipServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringFeedbackForSitsServiceComponent
 			with AutowiringProfileServiceComponent
+			with AutowiringSubmissionServiceComponent
+			with AutowiringFeedbackServiceComponent
 			with AutowiringCM2WorkflowProgressServiceComponent
 			with Unaudited with ReadOnly
 
@@ -49,7 +48,8 @@ trait SubmissionAndFeedbackState extends SelectedStudentsState {
 	def assignment: Assignment
 }
 
-trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState with SelectedStudentsRequest {
+trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState {
+	var students: JList[User] = JArrayList()
 	var submissionStatesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var plagiarismFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var statusesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
@@ -57,21 +57,6 @@ trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState with Selec
 	var overlapFilter: OverlapPlagiarismFilter = new OverlapPlagiarismFilter
 }
 
-
-trait SubmissionAndFeedbackEnhancer {
-	def enhanceSubmissions(): Seq[SubmissionListItem]
-	def enhanceFeedback(): ListFeedbackResult
-}
-
-trait CommandSubmissionAndFeedbackEnhancer extends SubmissionAndFeedbackEnhancer {
-	self: SubmissionAndFeedbackState =>
-
-	val enhancedSubmissionsCommand = ListSubmissionsCommand(assignment)
-	val enhancedFeedbacksCommand = ListFeedbackCommand(assignment)
-
-	override def enhanceSubmissions(): Seq[SubmissionListItem] = enhancedSubmissionsCommand.apply()
-	override def enhanceFeedback(): ListFeedbackResult = enhancedFeedbacksCommand.apply()
-}
 
 
 trait SubmissionAndFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -90,18 +75,19 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 		with UserLookupComponent
 		with FeedbackForSitsServiceComponent
 		with ProfileServiceComponent
-		with SubmissionAndFeedbackEnhancer
+		with SubmissionServiceComponent
+		with FeedbackServiceComponent
 		with CM2WorkflowProgressServiceComponent =>
 
 	override def applyInternal(): SubmissionAndFeedbackResults = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
-		val enhancedSubmissions = enhanceSubmissions()
-		val enhancedFeedbacks = enhanceFeedback()
+		val enhancedSubmissions = submissionService.submissionListItems(assignment, students.asScala.toSet)
+		val enhancedFeedback = feedbackService.getFeedbackMetadata(assignment, students.asScala.toSet)
 
-		val latestModifiedOnlineFeedback = enhancedFeedbacks.latestOnlineAdded
-		val whoDownloaded = enhancedFeedbacks.downloads
-		val whoViewed = enhancedFeedbacks.latestOnlineViews
-		val latestGenericFeedbackUpdate = enhancedFeedbacks.latestGenericFeedback
+		val latestModifiedOnlineFeedback = enhancedFeedback.latestOnlineAdded
+		val whoDownloaded = enhancedFeedback.downloads
+		val whoViewed = enhancedFeedback.latestOnlineViews
+		val latestGenericFeedbackUpdate = enhancedFeedback.latestGenericFeedback
 		val hasOriginalityReport = benchmarkTask("Check for originality reports") {
 			enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		}
@@ -281,8 +267,9 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 					itemExistsInPlagiarismFilters && itemExistsInSubmissionStatesFilters && itemExistsInStatusesFilters && itemExistsInExtensionFilters
 				}
 			}
-			val studentsFiltered = if (students.isEmpty) filteredStudents else filteredStudents.filter(studentInfo => students.contains(studentInfo.user.getUserId))
-			studentsFiltered
+			//val studentsFiltered = if (students.isEmpty) filteredStudents else filteredStudents.filter(studentInfo => students.contains(studentInfo.user.getUserId))
+			//studentsFiltered
+			filteredStudents
 		}
 
 		val workflowMarkers = if (!assignment.cm2Assignment || assignment.cm2MarkingWorkflow == null) {
