@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.services
 
-import java.util.concurrent.TimeoutException
-
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Restrictions.{ge, le}
 import org.hibernate.criterion.Order._
@@ -11,21 +9,15 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, OriginalityReport, Submission}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.cm2.SubmissionListItem
-import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryServiceComponent, AutowiringAuditEventQueryServiceComponent}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Await
-import scala.concurrent.duration._
 
 trait SubmissionService {
 	def saveSubmission(submission: Submission)
 	def getSubmissionByUsercode(assignment: Assignment, usercode: String): Option[Submission]
 	def getSubmissionsByAssignment(assignment: Assignment): Seq[Submission]
 	def loadSubmissionsForAssignment(assignment: Assignment): Seq[Submission]
-	def loadSubmissionsForAssignment(assignment: Assignment, students: Set[User]): Seq[Submission]
-	def submissionListItems(assignment: Assignment, students: Set[User]): Seq[SubmissionListItem]
 	def getSubmission(id: String): Option[Submission]
 	def getAllSubmissions(user: User): Seq[Submission]
 	def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
@@ -42,7 +34,7 @@ trait OriginalityReportService {
 
 abstract class AbstractSubmissionService extends SubmissionService with Daoisms with Logging {
 
-	self: OriginalityReportServiceComponent with AuditEventQueryServiceComponent =>
+	self: OriginalityReportServiceComponent =>
 
 	def saveSubmission(submission: Submission): Unit = {
 		session.saveOrUpdate(submission)
@@ -62,34 +54,14 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 	}
 
 	def loadSubmissionsForAssignment(assignment: Assignment) : Seq[Submission] =
-		loadSubmissionsForAssignment(assignment, Set.empty)
-
-	def loadSubmissionsForAssignment(assignment: Assignment, students: Set[User]) : Seq[Submission] = {
-		val criteria = session.newCriteria[Submission]
+		session.newCriteria[Submission]
 			.add(is("assignment", assignment))
-			.addOrder(desc("submittedDate"))
+  		.addOrder(desc("submittedDate"))
 			.setFetchMode("values", FetchMode.JOIN)
 			.setFetchMode("values.attachments", FetchMode.JOIN)
 			.setFetchMode("values.attachments._originalityReport", FetchMode.JOIN)
-
-		if(students.nonEmpty) {
-			criteria.add(safeIn("usercode", students.map(_.getUserId).toSeq)).distinct.seq
-		} else {
-			criteria.distinct.seq
-		}
-	}
-
-	def submissionListItems(assignment: Assignment, students: Set[User]): Seq[SubmissionListItem] = {
-		val submissions = loadSubmissionsForAssignment(assignment, students)
-
-		val downloads = try {
-			Await.result(auditEventQueryService.adminDownloadedSubmissions(assignment, submissions), 15.seconds)
-		} catch { case _: TimeoutException => Nil }
-
-		submissions.map { submission =>
-			SubmissionListItem(submission, downloads.contains(submission))
-		}
-	}
+  		.distinct
+			.seq
 
 	def getSubmission(id: String): Option[Submission] = getById[Submission](id)
 
@@ -118,8 +90,9 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 }
 
 @Service(value = "submissionService")
-class SubmissionServiceImpl extends AbstractSubmissionService
-	with AutowiringOriginalityReportServiceComponent with AutowiringAuditEventQueryServiceComponent
+class SubmissionServiceImpl
+	extends AbstractSubmissionService
+		with AutowiringOriginalityReportServiceComponent
 
 trait SubmissionServiceComponent {
 	def submissionService: SubmissionService

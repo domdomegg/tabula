@@ -59,8 +59,8 @@ object ListMarkerFeedbackCommand {
 			}.foldLeft(FeedbackByActionability(Nil, Nil, Nil))((a, b) => a.merge(b))
 		}
 
-		lazy val headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
-		lazy val numPreviousMarkers: Int = enhancedFeedbackByStage(headerStage)
+		lazy val  headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
+		lazy val  numPreviousMarkers: Int = enhancedFeedbackByStage(headerStage)
 			.map(_.previousMarkerFeedback.size)
 			.reduceOption(_ max _)
 			.getOrElse(0)
@@ -167,14 +167,13 @@ trait MarkerProgress extends TaskBenchmarking {
 
 	protected def enhance(assignment: Assignment, feedbackByStage: FeedbackByStage): EnhancedFeedbackByStage = benchmarkTask(s"Get workflow progress information for ${assignment.name}") {
 		val allMarkingStages = workflowProgressService.getStagesFor(assignment).filter(_.markingRelated)
+		val workflowStudents = workflowStudentsFor(assignment)
 
 		val usercodes = feedbackByStage.values.flatten.map(_.feedback.usercode).toSet
 		val students = {
 			if (usercodes.isEmpty) Map.empty[String, User]
 			else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
 		}.withDefault(new AnonymousUser(_))
-
-		val workflowStudents = workflowStudentsFor(assignment, students.values.toSet)
 
 		feedbackByStage.mapValues(mfs => mfs.flatMap(mf => {
 			workflowStudents.find(_.user == students(mf.feedback.usercode)).map(ws => {
