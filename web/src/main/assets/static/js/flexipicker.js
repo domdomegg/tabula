@@ -128,6 +128,7 @@
     this.includeGroups = options.includeGroups || false;
     this.includeEmail = options.includeEmail || false;
     this.tabulaMembersOnly = options.tabulaMembersOnly || false;
+    this.staffOnly = options.staffOnly || false;
     this.prefixGroups = options.prefixGroups || '';
     this.universityId = options.universityId || false;
 
@@ -280,6 +281,7 @@
         includeGroups: this.includeGroups,
         includeEmail: this.includeEmail,
         tabulaMembersOnly: this.tabulaMembersOnly,
+        staffOnly: this.staffOnly,
         universityId: this.universityId,
         query: query,
         exact: options.exact // if true, only returns 100% matches.

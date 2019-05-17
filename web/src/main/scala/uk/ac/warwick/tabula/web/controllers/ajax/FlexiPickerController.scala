@@ -162,8 +162,9 @@ object FlexiPickerController {
           if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
           else profileService.getMemberByUser(user, disableFilter = true).isDefined
         })
+        val isStaffIfNecessary = if (staffOnly) user.isStaff else true
 
-        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter
+        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary
       }
 
     private def searchGroups: FlexiPickerResult = {
@@ -230,7 +231,7 @@ object FlexiPickerController {
     var exact = false
     var universityId = false // when returning users, use university ID as value
     var tabulaMembersOnly = false // filter out anyone who isn't in the Tabula members db
-
+    var staffOnly = false
     def hasQuery: Boolean = query.hasText
   }
 
