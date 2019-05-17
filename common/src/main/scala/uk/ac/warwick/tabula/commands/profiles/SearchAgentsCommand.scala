@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.profiles
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberUserType.{Staff, Student}
+import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 
 object SearchAgentsCommand {
   def apply(user: CurrentUser) =
@@ -13,7 +13,7 @@ object SearchAgentsCommand {
       with SearchProfilesCommandPermissions
 }
 
-class SearchAgentsCommandInternal(user: CurrentUser) extends AbstractSearchProfilesCommand(user, Staff, Student)
+class SearchAgentsCommandInternal(user: CurrentUser) extends AbstractSearchProfilesCommand(user, Staff)
   with CommandInternal[Seq[Member]] {
 
   override def applyInternal(): Seq[Member] =
