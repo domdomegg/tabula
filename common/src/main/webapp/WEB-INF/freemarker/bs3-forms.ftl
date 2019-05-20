@@ -281,11 +281,6 @@ Macros for customised form elements, containers and more complex pickers.
     htmlId=""
     cssClass=""
     placeholder=""
-    includeEmail="false"
-    includeGroups="false"
-    includeUsers="true"
-    membersOnly="false"
-    universityId="false"
     multiple=false
     auto_multiple=true
     delete_existing=true
@@ -304,14 +299,14 @@ Macros for customised form elements, containers and more complex pickers.
               <#local ids=[status.value] />
             </#if>
           </#if>
-          <@render_profilepicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_profilepicker>
+          <@render_profilepicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_profilepicker>
         </@spring.bind>
       <#else>
-        <@render_profilepicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_profilepicker>
+        <@render_profilepicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_profilepicker>
       </#if>
     </#macro>
 
-    <#macro render_profilepicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly universityId delete_existing htmlId="">
+    <#macro render_profilepicker expression cssClass value multiple auto_multiple placeholder delete_existing htmlId="">
       <#if multiple><div class="profile-picker-collection" data-automatic="${auto_multiple?string}"></#if>
       <#local nested><#nested /></#local>
     <#-- List existing values -->
@@ -320,9 +315,6 @@ Macros for customised form elements, containers and more complex pickers.
           <div class="profile-picker-container <#if nested?has_content>input-group</#if>"><#--
 			--><input type="text" class="profile-picker form-control ${cssClass}"
                 name="${expression}" id="${htmlId}" placeholder="${placeholder}"
-                data-include-users="${includeUsers}" data-include-email="${includeEmail}"
-                data-include-groups="${includeGroups}" data-members-only="${membersOnly}"
-                data-universityid="${universityId}" data-prefix-groups="webgroup:"
                 data-can-delete="${delete_existing?c}" value="${id}" data-type="" autocomplete="off"
             />
             <#noescape>${nested}</#noescape>
@@ -333,9 +325,7 @@ Macros for customised form elements, containers and more complex pickers.
       <#if !value?has_content || (multiple && auto_multiple)>
         <div class="profile-picker-container <#if nested?has_content>input-group</#if>"><#--
 			--><input type="text" class="profile-picker form-control ${cssClass}"
-                name="${expression}" id="${htmlId}" placeholder="${placeholder}"
-                data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
-                data-members-only="${membersOnly}" data-universityid="${universityId}" data-can-delete="true"
+                name="${expression}" id="${htmlId}" placeholder="${placeholder}" data-can-delete="true"
                 data-prefix-groups="webgroup:" data-type="" autocomplete="off"
           />
           <#noescape>${nested}</#noescape>

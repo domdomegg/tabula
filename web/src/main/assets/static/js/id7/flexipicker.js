@@ -944,6 +944,243 @@
       .locationPicker();
   });
 
+  /**
+   * like flexi picker but uses profile search api endpoint
+   */
+  var ProfilePicker = function (options) {
+    var self = this;
+    var $element = $(options.input);
+
+    if (!$element.hasClass('profile-picker')) {
+      $element.addClass('profile-picker');
+    }
+
+    // Disable browser autocomplete dropdowns, it gets in the way.
+    $element.attr('autocomplete', 'off');
+
+    var $spinner = $element.parent().find('.spinner-container');
+    if ($spinner.length === 0) {
+      $spinner = $('<div />').addClass('spinner-container');
+      $element.before($spinner);
+    }
+
+    this.richResultField = new RichResultField($element[0]);
+
+    this.iconMappings = {
+      user: 'fa fa-user',
+      group: 'fa fa-globe',
+      email: 'fa fa-envelope'
+    };
+
+    var $typeahead = new TabulaTypeahead({
+      element: $element,
+      source: function (query, process) {
+        $spinner.spin('small');
+        self.search(query).done(function (results) {
+          $spinner.spin(false);
+          process(results);
+        });
+      },
+      item: '<li class=profile-picker-result><a href="#"><i></i><span class=title></span><span class=type></span><div class=description></div></a></li>'
+    });
+
+    // Renders each result item with icon and description.
+    $typeahead.render = function (items) {
+      var that = this;
+      var withIcons = $(items).filter(function (i, item) {
+        return item != undefined && item.type != undefined;
+      });
+      var useIcons = withIcons.filter(function (i, item) {
+        return item.type != withIcons.get(0).type;
+      }).length > 0;
+      items = $(items).map(function (i, item) {
+        if (item != undefined) {
+          i = $(that.options.item);
+          i.attr('data-value', item.value);
+          i.attr('data-type', item.type);
+          i.attr('data-fullname', item.name);
+          i.find('span.title').html(that.highlighter(item.title));
+          i.find('span.type').html(item.type);
+          if (useIcons) {
+            i.find('i').addClass(self.iconMappings[item.type]);
+          }
+          var desc = i.find('.description');
+          if (desc && desc != '') {
+            desc.html(item.description).show();
+          } else {
+            desc.hide();
+          }
+          return i[0];
+        } else {
+          // no idea what's happened here. Return an empty item.
+          return $(that.options.item)[0];
+        }
+      });
+
+      items.first().addClass('active');
+      this.$menu.html(items);
+      return this;
+    };
+
+    // On selecting a value, we can transform it here before it's stored in the field.
+    $typeahead.updater = function (value) {
+      var type = this.$menu.find('.active').attr('data-type');
+      return self.getValue(value, type);
+    };
+
+    // Override select item to place both the value in the field
+    // and a more userfriendly text in the "rich result".
+    var oldSelect = $typeahead.select;
+    $typeahead.select = function () {
+      var text = this.$menu.find('.active .title').text();
+      var desc = this.$menu.find('.active .description').text();
+      if (desc) {
+        text = text + ' (' + desc + ')';
+      }
+      self.richResultField.storeText(text);
+      this.$element.data('fullname', this.$menu.find('.active').data('fullname'));
+      return oldSelect.call($typeahead);
+    };
+
+    // On load, look up the existing value and give it human-friendly text if possible
+    // NOTE: this relies on the fact that the saved value is itself a valid search term
+    // (excluding the prefix on webgroup, which is handled by getQuery() method).
+    var currentValue = $element.val();
+    if (currentValue && currentValue.trim().length > 0) {
+      var searchQuery = this.getQuery(currentValue);
+      this.search(searchQuery, {exact: true}).done(function (results) {
+        if (results.length > 0) {
+          self.richResultField.storeText(results[0].title + ' (' + results[0].description + ')');
+        }
+      });
+    }
+
+    // The Bootstrap Typeahead always appends the drop-down to directly after the input
+    // Replace the show method so that the drop-down is added to the body
+    $typeahead.show = function () {
+      var pos = $.extend({}, this.$element.offset(), {
+        height: this.$element[0].offsetHeight
+      });
+
+      this.$menu.appendTo($('body')).show().css({
+        top: pos.top + pos.height, left: pos.left
+      });
+
+      this.shown = true;
+      return this;
+    };
+  };
+
+  // Extract the value from a chosen value with type.
+  ProfilePicker.prototype.getValue = function (value, type) {
+    return value;
+  };
+
+  // Turn value into something we can query on.
+  ProfilePicker.prototype.getQuery = function (value) {
+    return value;
+  };
+
+  /** Runs the search */
+  ProfilePicker.prototype.search = function (query, options) {
+    // We'll return a Deferred result, that will get resolved by the AJAX call
+    options = options || {};
+    var d = $.Deferred();
+    var self = this;
+    // Abort any existing search
+    if (this.currentSearch) {
+      this.currentSearch.abort();
+      this.currentSearch = null;
+    }
+    this.currentSearch = $.ajax({
+      url: '/profiles/relationships/agents/search.json',
+      dataType: 'json',
+      data: {
+        query: query,
+      },
+      success: function (results) {
+        if (results) {
+          $.each(results, function (i, item) {
+            item.title = item.name;
+            item.description = item.userId + ' ' + item.description;
+            item.value = item.userId;
+          });
+          d.resolve(results);
+        }
+      }
+    });
+    // unset the search when it's done
+    this.currentSearch.always(function () {
+      self.currentSearch = null;
+    });
+    return d;
+  };
+
+  // The jQuery plugin
+  $.fn.profilePicker = function (options) {
+    this.each(function () {
+      var $this = $(this);
+      if ($this.data('profile-picker')) {
+        throw new Error("Picker has already been added to this element.");
+      }
+      var allOptions = {
+        input: this,
+      };
+      $.extend(allOptions, options || {});
+      $this.data('profile-picker', new ProfilePicker(allOptions));
+    });
+    return this;
+  };
+
+  jQuery(function ($) {
+    $('.profile-picker').profilePicker({});
+
+    var emptyValue = function () {
+      return (this.value || "").trim() == "";
+    };
+
+    var $collections = $('.profile-picker-collection');
+    $collections.each(function (i, collection) {
+      var $collection = $(collection),
+        $blankInput = $collection.find('.profile-picker-container').first().clone()
+          .find('input').val('').end();
+      $blankInput.find('a.btn').remove();
+
+      // check whenever field is changed or focused
+      if (!!($collection.data('automatic'))) {
+        $collection.on('change focus', 'input', function (ev) {
+          // remove empty pickers
+          var $inputs = $collection.find('input');
+          if ($inputs.length > 1) {
+            var toRemove = $inputs.not(':focus').not(':last').filter(emptyValue).closest('.profile-picker-container');
+            toRemove.remove();
+          }
+
+          // if last picker is nonempty OR focused, append an blank picker.
+          var $last = $inputs.last();
+          var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
+          if (lastFocused || $last.val().trim() != '') {
+            var input = $blankInput.clone();
+            $collection.append(input);
+            input.find('input').first().profilePicker({});
+          }
+        });
+      } else {
+        $collection.append(
+          $('<button />')
+            .attr({'type': 'button'})
+            .addClass('btn btn-xs btn-default')
+            .html('Add another')
+            .on('click', function () {
+              var input = $blankInput.clone();
+              $(this).before(input);
+              input.find('input').first().profilePicker({});
+            })
+        );
+      }
+    });
+  });
+
 // End of wrapping
 })(jQuery);
 
