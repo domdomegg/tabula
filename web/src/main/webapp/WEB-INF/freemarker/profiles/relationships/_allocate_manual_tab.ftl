@@ -1,5 +1,4 @@
 <#escape x as x?html>
-  <@script "/static/js/id7/profilepicker.js" />
   <div id="allocatestudents-tab1" class="tab-pane active fix-area allocate-associations">
     <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="" cssClass="">
       <@spring.bind path=path>
