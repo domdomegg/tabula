@@ -272,6 +272,78 @@ Macros for customised form elements, containers and more complex pickers.
       <#if multiple></div></#if>
     </#macro>
 
+
+    <#macro profilepicker
+    path=""
+    list=false
+    object=false
+    name=""
+    htmlId=""
+    cssClass=""
+    placeholder=""
+    includeEmail="false"
+    includeGroups="false"
+    includeUsers="true"
+    membersOnly="false"
+    universityId="false"
+    multiple=false
+    auto_multiple=true
+    delete_existing=true
+    >
+      <#if name="">
+        <@spring.bind path=path>
+        <#-- This handles whether we're binding to a list or not but I think
+            it might still be more verbose than it needs to be. -->
+          <#local ids=[] />
+          <#if status.value??>
+            <#if list && status.actualValue?is_sequence>
+              <#local ids=status.actualValue />
+            <#elseif object>
+              <#local ids=[status.value.userId] />
+            <#elseif status.value?is_string>
+              <#local ids=[status.value] />
+            </#if>
+          </#if>
+          <@render_profilepicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_profilepicker>
+        </@spring.bind>
+      <#else>
+        <@render_profilepicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_profilepicker>
+      </#if>
+    </#macro>
+
+    <#macro render_profilepicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly universityId delete_existing htmlId="">
+      <#if multiple><div class="profile-picker-collection" data-automatic="${auto_multiple?string}"></#if>
+      <#local nested><#nested /></#local>
+    <#-- List existing values -->
+      <#if value?? && value?size gt 0>
+        <#list value as id>
+          <div class="profile-picker-container <#if nested?has_content>input-group</#if>"><#--
+			--><input type="text" class="profile-picker form-control ${cssClass}"
+                name="${expression}" id="${htmlId}" placeholder="${placeholder}"
+                data-include-users="${includeUsers}" data-include-email="${includeEmail}"
+                data-include-groups="${includeGroups}" data-members-only="${membersOnly}"
+                data-universityid="${universityId}" data-prefix-groups="webgroup:"
+                data-can-delete="${delete_existing?c}" value="${id}" data-type="" autocomplete="off"
+            />
+            <#noescape>${nested}</#noescape>
+          </div>
+        </#list>
+      </#if>
+
+      <#if !value?has_content || (multiple && auto_multiple)>
+        <div class="profile-picker-container <#if nested?has_content>input-group</#if>"><#--
+			--><input type="text" class="profile-picker form-control ${cssClass}"
+                name="${expression}" id="${htmlId}" placeholder="${placeholder}"
+                data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
+                data-members-only="${membersOnly}" data-universityid="${universityId}" data-can-delete="true"
+                data-prefix-groups="webgroup:" data-type="" autocomplete="off"
+          />
+          <#noescape>${nested}</#noescape>
+        </div>
+      </#if>
+      <#if multiple></div></#if>
+    </#macro>
+
     <#macro static>
       <div class="form-control-static">
         <#nested />

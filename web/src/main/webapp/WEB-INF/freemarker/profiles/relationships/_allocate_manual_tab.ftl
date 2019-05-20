@@ -1,4 +1,5 @@
 <#escape x as x?html>
+  <@script "/static/js/id7/profilepicker.js" />
   <div id="allocatestudents-tab1" class="tab-pane active fix-area allocate-associations">
     <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="" cssClass="">
       <@spring.bind path=path>
@@ -256,8 +257,9 @@
             </p>
 
             <@bs3form.labelled_form_group path="additionalEntityUserIds" labelText="${relationshipType.agentRole?cap_first}s">
-              <@bs3form.flexipicker path="additionalEntityUserIds" placeholder="User name" membersOnly="true" list=true multiple=true />
+              <@bs3form.profilepicker path="additionalEntityUserIds" placeholder="User name" membersOnly="true" list=true multiple=true />
             </@bs3form.labelled_form_group>
+
           </@modal.body>
 
           <@modal.footer>
