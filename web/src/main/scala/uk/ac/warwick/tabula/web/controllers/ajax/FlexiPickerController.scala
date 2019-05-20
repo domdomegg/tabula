@@ -118,7 +118,7 @@ object FlexiPickerController {
         if (terms.length == 1) {
           val user =
             if (UniversityId.isValid(terms(0)))
-              userLookup.getUserByWarwickUniId(terms(0))
+              userLookup.getUserByWarwickUniId(terms(0), includeDisabled)
             else
               userLookup.getUserByUserId(terms(0))
           if (user.isFoundUser) {
@@ -135,12 +135,12 @@ object FlexiPickerController {
         if (user.isFoundUser) {
           users = users :+ user
         } else {
-          users = users ++ userLookup.findUsersWithFilter(item("sn", terms(0)).asJava).asScala
+          users = users ++ userLookup.findUsersWithFilter(item("sn", terms(0)).asJava, includeDisabled).asScala
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)).asJava).asScala
+            users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)+"*").asJava, includeDisabled).asScala
           }
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter(item("cn", terms(0)).asJava).asScala
+            users ++= userLookup.findUsersWithFilter(item("cn", terms(0)).asJava, includeDisabled).asScala
           }
         }
       }
@@ -162,7 +162,8 @@ object FlexiPickerController {
           if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
           else profileService.getMemberByUser(user, disableFilter = true).isDefined
         })
-        val isStaffIfNecessary = if (staffOnly) user.isStaff else true
+//        val isStaffIfNecessary = if (staffOnly) Option(user.getExtraProperty("warwickitsclass")).contains("Staff") else true
+        val isStaffIfNecessary = true
 
         hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary
       }
@@ -232,6 +233,7 @@ object FlexiPickerController {
     var universityId = false // when returning users, use university ID as value
     var tabulaMembersOnly = false // filter out anyone who isn't in the Tabula members db
     var staffOnly = false
+    var includeDisabled = false
     def hasQuery: Boolean = query.hasText
   }
 

@@ -256,7 +256,7 @@
             </p>
 
             <@bs3form.labelled_form_group path="additionalEntityUserIds" labelText="${relationshipType.agentRole?cap_first}s">
-              <@bs3form.flexipicker path="additionalEntityUserIds" placeholder="User name" membersOnly="true" staffOnly="true" list=true multiple=true />
+              <@bs3form.flexipicker path="additionalEntityUserIds" placeholder="User name" membersOnly="true" staffOnly="true" includeDisabled="true" list=true multiple=true />
             </@bs3form.labelled_form_group>
           </@modal.body>
 

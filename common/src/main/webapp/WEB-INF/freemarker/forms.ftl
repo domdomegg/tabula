@@ -189,7 +189,7 @@ Include by default as "form", e.g.
         if you are binding to and from Users.
 
   -->
-    <#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" membersOnly="false" staffOnly="false" multiple=false auto_multiple=true>
+    <#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" membersOnly="false" staffOnly="false" includeDisabled="false" multiple=false auto_multiple=true>
       <#if name="">
         <@spring.bind path=path>
         <#-- This handles whether we're binding to a list or not but I think
@@ -204,14 +204,14 @@ Include by default as "form", e.g.
               <#local ids=[status.value] />
             </#if>
           </#if>
-          <@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple staffOnly=staffOnly />
+          <@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple staffOnly=staffOnly includeDisabled=includeDisabled />
         </@spring.bind>
       <#else>
-        <@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple staffOnly=staffOnly />
+        <@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple staffOnly=staffOnly includeDisabled=includeDisabled/>
       </#if>
     </#macro>
 
-    <#macro render_flexipicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly htmlId="" staffOnly="false">
+    <#macro render_flexipicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly htmlId="" staffOnly="false" includeDisabled="false">
       <#if multiple><div class="flexi-picker-collection" data-automatic="${auto_multiple?string}"></#if>
 
     <#-- List existing values -->
@@ -222,7 +222,7 @@ Include by default as "form", e.g.
                 name="${expression}" id="${htmlId}" placeholder="${placeholder}"
                 data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
                 data-members-only="${membersOnly}"
-                data-staff-only="${staffOnly}"
+                data-staff-only="${staffOnly}" data-include-disabled="${includeDisabled}"
                 data-prefix-groups="webgroup:" value="${id}" data-type="" autocomplete="off"
             />
           </div>
@@ -235,7 +235,7 @@ Include by default as "form", e.g.
               name="${expression}" id="${htmlId}" placeholder="${placeholder}"
               data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
               data-members-only="${membersOnly}"
-              data-staff-only="${staffOnly}"
+              data-staff-only="${staffOnly}" data-include-disabled="${includeDisabled}"
               data-prefix-groups="webgroup:" data-type="" autocomplete="off"
           />
         </div>

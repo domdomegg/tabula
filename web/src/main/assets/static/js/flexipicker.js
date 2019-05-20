@@ -129,6 +129,7 @@
     this.includeEmail = options.includeEmail || false;
     this.tabulaMembersOnly = options.tabulaMembersOnly || false;
     this.staffOnly = options.staffOnly || false;
+    this.includeDisabled = options.includeDisabled || false;
     this.prefixGroups = options.prefixGroups || '';
     this.universityId = options.universityId || false;
 
@@ -282,6 +283,7 @@
         includeEmail: this.includeEmail,
         tabulaMembersOnly: this.tabulaMembersOnly,
         staffOnly: this.staffOnly,
+        includeDisabled: this.includeDisabled,
         universityId: this.universityId,
         query: query,
         exact: options.exact // if true, only returns 100% matches.
@@ -319,6 +321,8 @@
         includeEmail: $this.data('include-email'),
         includeUsers: $this.data('include-users') !== false,
         tabulaMembersOnly: $this.data('members-only'),
+        staffOnly: $this.data('staff-only'),
+        includeDisabled: $this.data('include-disabled'),
         prefixGroups: $this.data('prefix-groups') || '',
         universityId: $this.data('universityid')
       };
