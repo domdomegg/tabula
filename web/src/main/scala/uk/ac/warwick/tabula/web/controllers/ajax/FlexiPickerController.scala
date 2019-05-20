@@ -137,7 +137,7 @@ object FlexiPickerController {
         } else {
           users = users ++ userLookup.findUsersWithFilter(item("sn", terms(0)).asJava, includeDisabled).asScala
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)+"*").asJava, includeDisabled).asScala
+            users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)).asJava, includeDisabled).asScala
           }
           if (users.size < EnoughResults) {
             users ++= userLookup.findUsersWithFilter(item("cn", terms(0)).asJava, includeDisabled).asScala
@@ -163,9 +163,10 @@ object FlexiPickerController {
           else profileService.getMemberByUser(user, disableFilter = true).isDefined
         })
 //        val isStaffIfNecessary = if (staffOnly) Option(user.getExtraProperty("warwickitsclass")).contains("Staff") else true
-        val isStaffIfNecessary = true
+//        val isStaffIfNecessary = true
 
-        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary
+//        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary
+        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter
       }
 
     private def searchGroups: FlexiPickerResult = {
