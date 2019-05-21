@@ -1,4 +1,5 @@
 <#import "*/mitcircs_components.ftl" as components />
+<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
 
 <#escape x as x?html>
   <h1>MIT-${submission.key}</h1>
@@ -59,6 +60,12 @@
           <div class="col-sm-8">
             <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
             <p><a href="<@routes.mitcircs.sensitiveEvidence submission />" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
+            <#if submission.state.entryName == "Submitted">
+              <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Ready for panel</a></p>
+            <#elseif submission.state.entryName == "Ready For Panel">
+              <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
+            </#if>
+            <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
           </div>
         </div>
       </div>

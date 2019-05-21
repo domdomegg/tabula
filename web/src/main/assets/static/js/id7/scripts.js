@@ -852,8 +852,8 @@ $(function () {
   $body.tabulaPrepareSpinners();
 
   // repeat these hooks for modals when shown
-  $body.on('shown.bs.modal', function () {
-    var $m = $(this);
+  $body.on('shown.bs.modal', function (e) {
+    var $m = $(e.target);
     $m.find('input.date-time-picker').tabulaDateTimePicker();
     $m.find('input.date-picker').tabulaDatePicker();
     $m.find('input.time-picker').tabulaTimePicker();

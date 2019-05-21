@@ -212,6 +212,29 @@ class MitCircsDetails {
 
       $modal.modal().modal('show');
     });
+
+    $details.on('submit', '#readyModal', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const $form = $(e.target);
+      const formData = new FormData(e.target);
+      const $container = $form.closest('.modal-content');
+      $.ajax({
+        url: $form.attr('action'),
+        type: 'POST',
+        data: formData,
+        success: (data) => {
+          if (data.success) {
+            document.location.reload();
+          } else {
+            $container.html(data);
+          }
+        },
+        cache: false,
+        contentType: false,
+        processData: false,
+      });
+    });
   }
 }
 

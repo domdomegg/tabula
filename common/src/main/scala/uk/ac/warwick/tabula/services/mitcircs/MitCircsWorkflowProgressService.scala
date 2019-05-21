@@ -90,7 +90,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
             health = WorkflowStageHealth.Warning,
           )
 
-        case MitigatingCircumstancesSubmissionState.Submitted =>
+        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel =>
           StageProgress(
             stage = Submission,
             started = true,
@@ -138,6 +138,27 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
     override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(Submission))
   }
 
+  // MCO confirms that submission contains sufficient information to be reviewed
+  case object ReadyForPanel extends MitCircsWorkflowStage {
+    override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress = submission.state match {
+
+      case MitigatingCircumstancesSubmissionState.ReadyForPanel => StageProgress(
+        stage = ReadyForPanel,
+        started = true,
+        messageCode = "workflow.mitCircs.ReadyForPanel.readyForReview",
+        completed = true,
+      )
+
+      case _ =>  StageProgress(
+        stage = ReadyForPanel,
+        started = false,
+        messageCode = "workflow.mitCircs.ReadyForPanel.notReady",
+      )
+    }
+
+    override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(Submission))
+  }
+
   // MCO presents cases to MC panel
   case object SelectedForPanel extends MitCircsWorkflowStage {
     override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress =
@@ -147,7 +168,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
         messageCode = "workflow.mitCircs.SelectedForPanel.notSelected",
       )
 
-    override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(Submission))
+    override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(ReadyForPanel))
   }
 
   // Panel agrees reject / mild / moderate / severe outcome and duration

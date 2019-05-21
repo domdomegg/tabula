@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
@@ -224,8 +225,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def saveOnBehalfOfStudent(): Unit = {
-    // TODO guard against doing this from invalid states
-
+    require(_state != Submitted, "Cannot save on behalf of a student if they have already submitted")
     _state = MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent
     _approvedOn = null
   }
@@ -235,6 +235,16 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
     _state = MitigatingCircumstancesSubmissionState.Submitted
     _approvedOn = DateTime.now()
+  }
+
+  def readyForPanel(): Unit = {
+    require(_state == Submitted, "Cannot set as ready for review until this has been submitted by the student")
+    _state = MitigatingCircumstancesSubmissionState.ReadyForPanel
+  }
+
+  def notReadyForPanel(): Unit = {
+    require(_state == ReadyForPanel, "Cannot set as not ready for panel")
+    _state = MitigatingCircumstancesSubmissionState.Submitted
   }
 
   def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft

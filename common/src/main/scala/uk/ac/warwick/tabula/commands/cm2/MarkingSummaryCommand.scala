@@ -182,7 +182,7 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
         feedback.outstandingStages.asScala.forall(outstandingStage =>
 
           // are earlier in the workflow than the next stage this marker is involved with
-          feedback.allMarkerFeedback.filter(_.marker == markerUser).filterNot(_.hasBeenModified)
+          feedback.allMarkerFeedback.filter(_.marker == markerUser)
             .map(_.stage).sortBy(_.order).headOption
             .exists(nextStageInvolvingMarker => outstandingStage.order < nextStageInvolvingMarker.order)
         )

@@ -24,6 +24,7 @@ object Routes {
     def home(department: Department, academicYear: AcademicYear): String = s"$context/admin/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
     def review(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}"
     def sensitiveEvidence(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/sensitiveevidence"
+    def readyForPanel(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/ready"
   }
 
   object Messages {
