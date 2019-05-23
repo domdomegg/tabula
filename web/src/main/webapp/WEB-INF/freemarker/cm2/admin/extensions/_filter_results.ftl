@@ -5,6 +5,20 @@
 
 <div id="profile-modal" class="modal fade profile-subset"></div>
 
+<#function sortClass field>
+  <#list command.sortOrder as order>
+    <#if order.propertyName == field>
+      <#if order.ascending>
+        <#return "headerSortDown" />
+      <#else>
+        <#return "headerSortUp" />
+      </#if>
+    </#if>
+  </#list>
+  <#return "" />
+</#function>
+
+<div id="filter-results">
 <div class="row extension-metadata">
   <div class="col-md-7">
     <p>Found <@fmt.p results.total "extension" />.</p>
@@ -22,20 +36,20 @@
 <table id="student-extension-management" class="students table table-striped sticky-table-headers expanding-table">
   <thead>
     <tr>
-      <th class="student-col">First name</th>
-      <th class="student-col">Last name</th>
-      <th class="student-col">University ID</th>
-      <th>Module</th>
-      <th>Assignment</th>
-      <th class="status-col">Status</th>
-      <th class="duration-col">Extension length</th>
-      <th class="deadline-col">Submission due</th>
+      <th class="student-col ${sortClass("member.firstName")}" data-field="member.firstName">First name</th>
+      <th class="student-col ${sortClass("member.lastName")}" data-field="member.lastName">Last name</th>
+      <th class="student-col ${sortClass("_universityId")}" data-field="_universityId">University ID</th>
+      <th class="${sortClass("module.code")}" data-field="module.code">Module</th>
+      <th class="${sortClass("assignment.name")}" data-field="assignment.name">Assignment</th>
+      <th class="status-col ${sortClass("_state")}" data-field="_state">Status</th>
+      <th class="duration-col ${sortClass("lengthDays")}" data-field="lengthDays">Extension length</th>
+      <th class="deadline-col ${sortClass("expiryDateOrAssignmentCloseDate")}" data-field="expiryDateOrAssignmentCloseDate">Submission due</th>
     </tr>
   </thead>
   <tbody>
   <#list results.extensions as graph>
     <tr class="itemContainer"
-        
+
         data-contentid="extension${graph.extension.id}"
         data-detailurl="<@routes.cm2.extensionDetail graph.extension />"
     >
@@ -77,6 +91,7 @@
   </#list>
   </tbody>
 </table>
+</div>
 
 <script type="text/javascript">
   (function ($) {
@@ -94,20 +109,76 @@
       type: 'numeric'
     });
 
-
     $('.expanding-table').expandingTable({
       contentUrlFunction: function ($row) {
         return $row.data('detailurl');
       },
       useIframe: true,
-      tableSorterOptions: {
-        sortList: [[1, 0], [0, 0]],
-        headers: {
-          6: {sorter: 'customdate'},
-          7: {sorter: 'customdate'}
-        }
-      },
+      <#if totalPages gt 1>
+        allowTableSort: false,
+      <#else>
+        tableSorterOptions: {
+          sortList: [[1, 0], [0, 0]],
+          headers: {
+            6: {sorter: 'customdate'},
+            7: {sorter: 'customdate'}
+          }
+        },
+      </#if>
       preventContentIdInUrl: true
     });
+
+    <#if totalPages gt 1>
+      var doRequest = function ($form, preventPageReset) {
+        if (typeof history.pushState !== 'undefined')
+          history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
+
+        if ($form.data('request')) {
+          $form.data('request').abort();
+          $form.data('request', null);
+        }
+
+        if (!preventPageReset) {
+          $form.find('input[name="page"]').val('1');
+        }
+
+        $('#filter-results').addClass('loading');
+        $('.filter-container .placeholder').addClass('loading');
+        $form.data('request', $.post($form.attr('action'), $form.serialize(), function (data) {
+          $('#filter-results').html(data);
+
+          $form.data('request', null);
+          $('#filter-results').removeClass('loading');
+          $('.filter-container .placeholder').removeClass('loading');
+
+          // callback for hooking in local changes to results
+          $(document).trigger("tabula.filterResultsChanged");
+        }));
+      };
+      window.doRequest = doRequest;
+
+      // CUSTOM TABLE SORTING
+      $(".expanding-table").addClass('tablesorter')
+        .find('th:not(:first-child)').addClass('header')
+        .on('click', function (e) {
+          var $th = $(this);
+
+          if ($th.hasClass('headerSortDown')) {
+            $('#sortOrder').val('desc(' + $th.data('field') + ')');
+            $th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+            $th.addClass('headerSortUp');
+          } else {
+            $('#sortOrder').val('asc(' + $th.data('field') + ')');
+            $th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+            $th.addClass('headerSortDown');
+          }
+
+          if (typeof (window.doRequest) === 'function') {
+            window.doRequest($('#command'), true);
+          } else {
+            $('#command').submit();
+          }
+        });
+      </#if>
   })(jQuery);
 </script>

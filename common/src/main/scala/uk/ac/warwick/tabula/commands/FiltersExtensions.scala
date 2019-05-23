@@ -7,6 +7,7 @@ import org.apache.http.client.utils.URLEncodedUtils
 import org.hibernate.NullPrecedence
 import org.hibernate.criterion.Restrictions.{gt => _, _}
 import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.sql.JoinType
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
@@ -26,7 +27,6 @@ import scala.collection.JavaConverters._
 
 object FiltersExtensions {
   val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
-
     "assignment" -> Seq(
       "assignment" -> AliasAndJoinType("assignment")
     ),
@@ -40,11 +40,12 @@ object FiltersExtensions {
       "assignment" -> AliasAndJoinType("assignment"),
       "assignment.module" -> AliasAndJoinType("module"),
       "module.adminDepartment" -> AliasAndJoinType("department")
+    ),
+
+    "member" -> Seq(
+      "member" -> AliasAndJoinType("member", joinType = JoinType.LEFT_OUTER_JOIN)
     )
   ).toMap
-
-  val MaxExtensionsPerPage = 100
-  val DefaultExtensionsPerPage = 25
 }
 
 trait FiltersExtensions extends {

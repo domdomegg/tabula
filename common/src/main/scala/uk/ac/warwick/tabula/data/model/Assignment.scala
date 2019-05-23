@@ -902,6 +902,7 @@ class Assignment
     val markerFeedbacks = allFeedback.flatMap(_.allMarkerFeedback)
     markerFeedbacks.foreach(feedbackService.delete)
     feedbacks.asScala.foreach(f => {
+      f.clearAttachments()
       f.outstandingStages.clear()
       f.markerFeedback.clear()
       feedbackService.saveOrUpdate(f)

@@ -11,6 +11,10 @@
     modelAttribute="command"
     class="form-inline"
     >
+      <#if command.sortOrder??>
+        <@f.hidden path="sortOrder" />
+      </#if>
+
     <#-- Department filter-->
       <#assign placeholder = "All departments" />
       <#assign currentfilter><@current_filter_value "command.departments" placeholder; department>${department.code}</@current_filter_value></#assign>

@@ -7,7 +7,7 @@ import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.hibernate.`type`.{StandardBasicTypes, StringType}
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Formula, Type}
 import org.joda.time.{DateTime, Days}
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.spring.Wire
@@ -40,12 +40,22 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   def permissionsParents: Stream[PermissionsTarget] =
     Option(assignment).toStream #::: profileService.getAllMembersWithUserId(usercode).toStream
 
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
+  @JoinColumn(name = "universityid", insertable = false, updatable = false)
+  var member: Member = _
+
   @NotNull
   @Column(name = "userId")
   var usercode: String = _
 
   @Column(name = "universityId")
   var _universityId: String = _
+
+  @Formula("(select coalesce(expiryDate, assignment.closeDate) from assignment where assignment.id = assignment_id and assignment.openEnded = false)")
+  var expiryDateOrAssignmentCloseDate: DateTime = _
+
+  @Formula("(select date_part('day', coalesce(expiryDate, requestedExpiryDate, assignment.closeDate) - assignment.closeDate) from assignment where assignment.id = assignment_id and assignment.openEnded = false)")
+  var lengthDays: JInteger = _
 
   override def humanReadableId: String = s"Extension for $usercode for ${assignment.humanReadableId}"
 
