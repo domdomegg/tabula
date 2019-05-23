@@ -897,6 +897,15 @@
       return this.$menu.find('.active .name').text();
     };
 
+    $element.on('change', function () {
+      const $this = $(this);
+      if ($this.data('lid') === undefined || $this.data('lid').length === 0)
+        return;
+
+      $this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
+      $this.data('lid', '');
+    });
+
     return $typeahead;
   };
 
@@ -929,19 +938,7 @@
    * Meeting locationid updater
    */
   jQuery(function ($) {
-
-
-    $('input#meetingLocation')
-
-      .on('change', function () {
-        var $this = $(this);
-        if ($this.data('lid') === undefined || $this.data('lid').length === 0)
-          return;
-
-        $this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
-        $this.data('lid', '');
-      })
-      .locationPicker();
+    $('input#meetingLocation').locationPicker();
   });
 
   /**

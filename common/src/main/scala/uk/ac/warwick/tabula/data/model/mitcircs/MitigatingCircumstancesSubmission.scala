@@ -81,6 +81,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @JoinColumn(name = "relatedSubmission")
   var relatedSubmission: MitigatingCircumstancesSubmission = _
 
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
+  @JoinColumn(name = "panel_id")
+  private var _panel: MitigatingCircumstancesPanel = _
+  def panel: Option[MitigatingCircumstancesPanel] = Option(_panel)
+  def panel_=(panel: MitigatingCircumstancesPanel): Unit = _panel = panel
+
   @Column(nullable = false)
   var startDate: LocalDate = _
 
@@ -266,7 +272,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   )
 
   // Don't use the student directly as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(MitigatingCircumstancesStudent(student))
+  override def permissionsParents: Stream[PermissionsTarget] = panel.toStream :+ MitigatingCircumstancesStudent(student)
 }
 
 

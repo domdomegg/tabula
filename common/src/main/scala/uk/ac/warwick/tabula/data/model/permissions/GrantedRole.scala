@@ -5,6 +5,7 @@ import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue, Type}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, Role, RoleBuilder, RoleDefinition}
@@ -57,6 +58,7 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
       new MetaValue(targetEntity = classOf[SmallGroup], value = "SmallGroup"),
       new MetaValue(targetEntity = classOf[SmallGroupSet], value = "SmallGroupSet"),
       new MetaValue(targetEntity = classOf[SmallGroupEvent], value = "SmallGroupEvent"),
+      new MetaValue(targetEntity = classOf[MitigatingCircumstancesPanel], value = "MitigatingCircumstancesPanel"),
     )
   )
   @JoinColumn(name = "scope_id")
@@ -136,6 +138,7 @@ object GrantedRole {
     case t if isSubtype(t, classTag[SmallGroup]) => Some("SmallGroup")
     case t if isSubtype(t, classTag[SmallGroupSet]) => Some("SmallGroupSet")
     case t if isSubtype(t, classTag[SmallGroupEvent]) => Some("SmallGroupEvent")
+    case t if isSubtype(t, classTag[MitigatingCircumstancesPanel]) => Some("MitigatingCircumstancesPanel")
     case _ => None
   }
 

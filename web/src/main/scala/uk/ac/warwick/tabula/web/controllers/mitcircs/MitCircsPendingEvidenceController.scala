@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.mitcircs.submission.{MitCircsPendingEvidenceCommand, MitCircsPendingEvidenceState}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.Submitted
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs

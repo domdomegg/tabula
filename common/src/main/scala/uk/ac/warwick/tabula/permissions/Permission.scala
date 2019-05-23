@@ -399,4 +399,8 @@ object Permissions {
     case object Read extends Permission("View the details and messages associated with a mitigating circumstances submission")
     case object ViewGrading extends Permission("View the grading of an existing mitigating circumstances submission")
   }
+
+  object MitigatingCircumstancesPanel {
+    case object Modify extends Permission("Create and modify mitigating circumstances panels")
+  }
 }

@@ -9,7 +9,7 @@
   </#function>
   <@fmt.id7_deptheader "Mitigating Circumstances Submissions" route_function "in" />
 
-<#-- Filtering -->
+  <#-- Filtering -->
   <div class="fix-area">
     <div class="fix-header pad-when-fixed">
       <div class="filters btn-group-group well well-sm" data-lazy="true">
@@ -151,8 +151,16 @@
       </div>
     </div>
 
-    <div class="filter-results mitcircs-submission-list">
-      <i class="fal fa-spinner fa-spin"></i> Loading&hellip;
-    </div>
+    <@f.form class="mitcircs-submission-actions" action="" method="POST">
+      <div class="mitcircs-submission-action__buttons">
+        <div class="btn-group-group">
+          <button type="submit" formaction="<@routes.mitcircs.createPanel department academicYear />" disabled="disabled" class="requires-selected btn btn-default">Create panel</button>
+        </div>
+      </div>
+
+      <div class="filter-results mitcircs-submission-list">
+        <i class="fal fa-spinner fa-spin"></i> Loading&hellip;
+      </div>
+    </@f.form>
   </div>
 </#escape>
