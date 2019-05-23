@@ -451,12 +451,21 @@ object CM2WorkflowStages {
 
         // This is a past stage - if the moderation stage is in the past wasModerated tells us if it was skipped
         val skipped = markingStage.isInstanceOf[ModerationStage] && !feedback.exists(_.wasModerated)
+
+        val nextStages: Seq[MarkingWorkflowStage] = markingStage.nextStages
+
+        // if it's sent to admin and feedback was not moderated, the feedback will not need moderating
+        val sentToAdminNotModerated = nextStages.nonEmpty &&
+          nextStages.length == 1 &&
+          nextStages.head == MarkingWorkflowStage.ModerationCompleted &&
+          feedback.exists(!_.wasModerated)
+
         StageProgress(
           workflowStage,
           started = true,
           messageCode = s"workflow.cm2.${markingStage.name}.$completedKey",
           health = Good,
-          completed = !skipped,
+          completed = !skipped || sentToAdminNotModerated,
           skipped = skipped
         )
       }
