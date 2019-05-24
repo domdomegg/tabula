@@ -37,7 +37,7 @@ case class MarkingWorkflowStudent(
 
   def assignment: Assignment = info.assignment
 
-  def nextAction: Option[String] = stages.filterNot(_.completed).headOption.map(_.stage.actionCode)
+  def nextAction: Option[String] = stages.filterNot(_.skipped).filterNot(_.completed).headOption.map(_.stage.actionCode)
 }
 
 object ListMarkerFeedbackCommand {
