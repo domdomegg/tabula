@@ -5,8 +5,11 @@ import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{SelectedModerationAdmin, SelectedModerationModerator}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SelectedModeratedMarking
 import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, MarkingWorkflowType}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 /**
@@ -412,11 +415,12 @@ object SubmissionAndFeedbackInfoFilters {
       }
 
       val allPossibleStages = MarkingWorkflowType.allPossibleStages.values.flatten.toSeq
+        .filterNot(_ == SelectedModerationAdmin) // exclude this stage so it can't be confused with SelectedForModeration
       allPossibleStages.sortBy(s => s.order).map(s => s.name -> WorkflowFilter(s)).distinct.toMap
 
     }
 
-    lazy val allStatuses: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotReleasedForMarking, MarkedByFirst, MarkedBySecond, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded) ++ allWorkflowFilters.values
+    lazy val allStatuses: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotReleasedForMarking, MarkedByFirst, MarkedBySecond, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded, SelectedForModeration) ++ allWorkflowFilters.values
 
     // marker specific filters
     case object MarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
@@ -460,6 +464,13 @@ object SubmissionAndFeedbackInfoFilters {
       })
     }
 
+    case object SelectedForModeration extends SubmissionAndFeedbackInfoFilter {
+      override def description: String = "Selected for moderation"
+
+      override def apply(assignment: Assignment): Boolean = assignment.cm2MarkingWorkflow.workflowType == SelectedModeratedMarking
+
+      override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedFeedback.exists(ef => ef.feedback.outstandingStages.asScala.contains(SelectedModerationModerator) || ef.feedback.wasModerated)
+    }
   }
 
 

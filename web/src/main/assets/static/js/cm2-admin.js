@@ -54,6 +54,13 @@ $(function () {
 
       var $content = $this.find('td');
 
+      // abort any currently running requests
+      if ($this.data('request')) {
+        $this.data('request').abort();
+        $this.data('request', null);
+        $content.html('<i class="fa fa-spinner fa-spin"></i> Loading');
+      }
+
       $this.data('request', $.ajax({
         url: detailUrl,
         statusCode: {

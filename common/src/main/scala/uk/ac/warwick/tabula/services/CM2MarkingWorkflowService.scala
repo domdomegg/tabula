@@ -198,12 +198,12 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
       throw new IllegalArgumentException(s"The following stages aren't all in the same workflow step - ${stages.map(_.name).mkString(", ")}")
 
     feedbacks.flatMap(f => {
-      val currentStages = f.outstandingStages.asScala
+      val beforeStages = f.outstandingStages.asScala
       val targetOrder = stages.headOption.map(_.order).getOrElse(0)
-      val newStages = currentStages.filter(_.order == targetOrder) ++ stages // keep any current stages at the same step in the workflow as the target
-      f.outstandingStages = newStages.toSet.asJava
+      val afterStages = beforeStages.filter(_.order == targetOrder) ++ stages // keep any current stages at the same step in the workflow as the target
+      f.outstandingStages = afterStages.toSet.asJava
       feedbackService.saveOrUpdate(f)
-      f.allMarkerFeedback.filter(mf => f.outstandingStages.contains(mf.stage))
+      f.allMarkerFeedback.filter(mf => afterStages.contains(mf.stage) && !beforeStages.contains(mf.stage))
     })
   }
 

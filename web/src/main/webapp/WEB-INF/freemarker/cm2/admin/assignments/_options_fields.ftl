@@ -49,7 +49,7 @@
     <@f.input path="wordCountMin" cssClass="form-control" id="wordCountMin" />
   </@bs3form.labelled_form_group>
   <@bs3form.labelled_form_group path="wordCountMax" labelText="Maximum word count">
-    <@f.input path="wordCountMax" cssClass="form-control" id="wordCountMax" placeholder=command.defaultWordCountMax() />
+    <@f.input path="wordCountMax" cssClass="form-control" id="wordCountMax" placeholder=command.defaultWordCountMax />
     <div class="help-block">
       If you specify a minimum and/or maximum word count, students must declare that the word count for their submission is within your specified range.
       If you don't specify a minimum and/or maximum, students don't need to declare a word count. Note that Tabula does not actually check the number of words

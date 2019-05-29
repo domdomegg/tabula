@@ -250,7 +250,7 @@
           <#if user?? && user.sysadmin>
             <div id="sysadmin-link">
               <div class="btn-group">
-                <a id="sysadmin-button" class="btn btn-inverse dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i
+                <a id="sysadmin-button" class="btn btn-default dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i
                           class="icon-cog fa fa-cog icon-white fa fa-white"></i> System <span class="caret"></span></a>
                 <ul class="dropdown-menu pull-right">
                   <#if user.sysadmin>
@@ -274,7 +274,7 @@
             </script>
           <#elseif user?? && user.masquerader>
             <div id="sysadmin-link">
-              <a id="sysadmin-button" class="btn btn-inverse" href="<@url page="/masquerade" context="/admin" />?returnTo=${(info.requestedUri!"")?url}"><i
+              <a id="sysadmin-button" class="btn btn-default" href="<@url page="/masquerade" context="/admin" />?returnTo=${(info.requestedUri!"")?url}"><i
                         class="icon-user fa fa-user icon-white fa fa-white"></i> Masquerade</a>
             </div>
           </#if>
