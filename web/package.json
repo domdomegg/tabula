@@ -54,7 +54,7 @@
     "jquery": "3.4.0",
     "jquery-caret-plugin": "1.5.3",
     "jquery-ui": "1.12.1",
-    "lodash-es": "4.17.11",
+    "lodash-es": "4.17.21",
     "moment-timezone": "github:UniversityofWarwick/moment-timezone#0.5.23-london",
     "spin.js": "4.0.0"
   },
